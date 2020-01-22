@@ -1,4 +1,4 @@
-FROM certbot/dns-dnsimple:v0.33.1
+FROM certbot/dns-cloudflare
 
 ARG VAULT_VERSION=1.1.3
 

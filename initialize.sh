@@ -22,8 +22,11 @@ for i in meta private_key regr; do
     > "$ACCOUNT_PATH/$i.json"
 done
 
-echo "dns_dnsimple_token = $(vault kv get --format=json secret/dnsimple | jq -r '.data.data.token')" > /etc/letsencrypt/dnsimple.ini
-chmod 600 /etc/letsencrypt/dnsimple.ini
+read cfUsername cfAPI < <(docker exec -it vault-01 sh -c "export VAULT_ADDR=http://127.0.0.1:8200 && vault login s.PNqyBhwl5mgmzpwg2OeJ3o7a > /dev/null && vault kv get --format=json secret/prd/saas/cloudflare/primary" | jq -r '.data.username, .data.api')
+echo "dns_cloudflare_email = ${cfUsername}" > /etc/letsencrypt/cloudflare.ini
+echo "dns_cloudflare_api_key  = ${cfAPI}" > /etc/letsencrypt/cloudflare.ini
+# echo "dns_cloudflare_email = $(vault kv get --format=json secret/prd/saas/cloudflare/primary | jq -r '.data.username')" > /etc/letsencrypt/cloudflare.ini
+chmod 600 /etc/letsencrypt/cloudflare.ini
 
 CERTIFICATES_TO_CHECK=$(vault kv list --format=json secret/lets-encrypt/certificates | jq -r '.[]')
 

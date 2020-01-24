@@ -41,7 +41,7 @@ certbot certonly \
   ${certbotDomains}
 
 vault kv put \
-  "secret/lets-encrypt/certificates/${domains%% *}" \
+  "secret/prd/certificates/lets-encrypt/${domains%% *}" \
   "cert=@/etc/letsencrypt/live/${domains%% *}/cert.pem" \
   "chain=@/etc/letsencrypt/live/${domains%% *}/chain.pem" \
   "privkey=@/etc/letsencrypt/live/${domains%% *}/privkey.pem"

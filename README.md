@@ -53,3 +53,15 @@ certbot certonly \
   --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
   -d "example.com"
 ```
+
+```bash
+VAULT_TOKEN=s.PNqyBhwl5mgmzpwg2OeJ3o7a
+docker run --rm --name certbot-vault \
+  -e "VAULT_ADDR=http://192.168.13.250:8200" \
+  -e "VAULT_TOKEN=${VAULT_TOKEN}" \
+  -e "domains=hal.teller.house" \
+  --entrypoint sh \
+  -v /home/ubuntu/generate.sh:/usr/local/bin/generate.sh \
+  -v /home/ubuntu/entrypoint.sh:/usr/local/bin/entrypoint.sh \
+  rteller/certbot-dns-cloudflare /usr/local/bin/generate.sh
+  ```

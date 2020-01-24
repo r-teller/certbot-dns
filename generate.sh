@@ -30,13 +30,18 @@ echo -e "dns_cloudflare_email = ${cfUsername}\r\ndns_cloudflare_api_key  = ${cfA
 
 chmod 600 /etc/letsencrypt/cloudflare.ini
 
+certbotDomains=""
+for i in ${domains}; do
+certbotDomains=" -d ${i} ${certbotDomains}"
+done
+
 certbot certonly \
   --dns-cloudflare \
   --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
-  -d "${domains}"
+  ${certbotDomains}
 
-  vault kv put \
-  "secret/lets-encrypt/certificates/${primaryDomain}" \
-  "cert=@/etc/letsencrypt/live/${primaryDomain}/cert.pem" \
-  "chain=@/etc/letsencrypt/live/${primaryDomain}/chain.pem" \
-  "privkey=@/etc/letsencrypt/live/${primaryDomain}/privkey.pem"
+vault kv put \
+  "secret/lets-encrypt/certificates/${domains%% *}" \
+  "cert=@/etc/letsencrypt/live/${domains%% *}/cert.pem" \
+  "chain=@/etc/letsencrypt/live/${domains%% *}/chain.pem" \
+  "privkey=@/etc/letsencrypt/live/${domains%% *}/privkey.pem"

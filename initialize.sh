@@ -11,14 +11,14 @@ fi
 
 # Get account path
 ACCOUNT_PARENT_PATH=/etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory
-ACCOUNT_ID=$(vault kv get --format=json secret/prd/saas/lets-encrypt/account/extra_details | jq -r '.data.data.account_id')
+ACCOUNT_ID=$(vault kv get --format=json secret/prd/saas/lets-encrypt | jq -r '.data.account_id')
 ACCOUNT_PATH="$ACCOUNT_PARENT_PATH/$ACCOUNT_ID"
 
 mkdir -p "$ACCOUNT_PATH"
 
 for i in meta private_key regr; do
   vault kv get --format=json "secret/lets-encrypt/account/$i" | \
-    jq -c '.data.data' \
+    jq -c '.data' \
     > "$ACCOUNT_PATH/$i.json"
 done
 
@@ -33,7 +33,7 @@ CERTIFICATES_TO_CHECK=$(vault kv list --format=json secret/prd/lets-encrypt/cert
 mkdir -p /etc/letsencrypt/renewal
 
 for certificate in $CERTIFICATES_TO_CHECK; do
-  CERTIFICATE_DATA=$(vault kv get --format=json "secret/beyond/lets-encrypt-certificates/certificates/${certificate}")
+  CERTIFICATE_DATA=$(vault kv get --format=json "secret/prd/lets-encrypt/certificates/${certificate}")
   mkdir -p "/etc/letsencrypt/archive/${certificate}"
   mkdir -p "/etc/letsencrypt/live/${certificate}"
   for field in cert chain privkey; do
@@ -62,9 +62,9 @@ chain = /etc/letsencrypt/live/$certificate/chain.pem
 fullchain = /etc/letsencrypt/live/$certificate/fullchain.pem
 # Options used in the renewal process
 [renewalparams]
-authenticator = dns-dnsimple
+authenticator = dns-cloudflare
 account = $ACCOUNT_ID
-dns_dnsimple_credentials = /etc/letsencrypt/dnsimple.ini
+dns_cloudflare_credentials = /etc/letsencrypt/cloudflare.ini
 server = https://acme-v02.api.letsencrypt.org/directory
 EOF
 done

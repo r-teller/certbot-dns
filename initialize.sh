@@ -11,7 +11,7 @@ fi
 
 # Get account path
 ACCOUNT_PARENT_PATH=/etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory
-ACCOUNT_ID=$(vault kv get --format=json secret/lets-encrypt/account/extra_details | jq -r '.data.data.account_id')
+ACCOUNT_ID=$(vault kv get --format=json secret/prd/saas/lets-encrypt/account/extra_details | jq -r '.data.data.account_id')
 ACCOUNT_PATH="$ACCOUNT_PARENT_PATH/$ACCOUNT_ID"
 
 mkdir -p "$ACCOUNT_PATH"
@@ -22,13 +22,13 @@ for i in meta private_key regr; do
     > "$ACCOUNT_PATH/$i.json"
 done
 
-read cfUsername cfAPI < <(docker exec -it vault-01 sh -c "export VAULT_ADDR=http://127.0.0.1:8200 && vault login s.PNqyBhwl5mgmzpwg2OeJ3o7a > /dev/null && vault kv get --format=json secret/prd/saas/cloudflare/primary" | jq -r '.data.username, .data.api')
+read cfUsername cfAPI < <(vault kv get --format=json secret/prd/saas/cloudflare/primary | jq -r '.data.username, .data.api')
 echo "dns_cloudflare_email = ${cfUsername}" > /etc/letsencrypt/cloudflare.ini
 echo "dns_cloudflare_api_key  = ${cfAPI}" > /etc/letsencrypt/cloudflare.ini
 # echo "dns_cloudflare_email = $(vault kv get --format=json secret/prd/saas/cloudflare/primary | jq -r '.data.username')" > /etc/letsencrypt/cloudflare.ini
 chmod 600 /etc/letsencrypt/cloudflare.ini
 
-CERTIFICATES_TO_CHECK=$(vault kv list --format=json secret/lets-encrypt/certificates | jq -r '.[]')
+CERTIFICATES_TO_CHECK=$(vault kv list --format=json secret/prd/lets-encrypt/certificates | jq -r '.[]')
 
 mkdir -p /etc/letsencrypt/renewal
 

@@ -23,7 +23,7 @@ for domain in $RENEWED_DOMAINS; do
   esac
 
   vault kv get \
-    "secret/lets-encrypt/certificates/$target" \
+    "secret/prd/lets-encrypt/certificates/$target" \
     "cert=@$RENEWED_LINEAGE/cert.pem" \
     "chain=@$RENEWED_LINEAGE/chain.pem" \
     "privkey=@$RENEWED_LINEAGE/privkey.pem"

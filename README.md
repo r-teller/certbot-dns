@@ -8,6 +8,12 @@ docker run --rm -it --name certbot-vault \
   --network certbot-vault-net \
   certbot-vault sh
 ```
+```bash
+docker run --rm -it --name certbot-vault \
+  -e "VAULT_ADDR=http://192.168.13.250:8200" \
+  -e "VAULT_TOKEN=s.PNqyBhwl5mgmzpwg2OeJ3o7a" \
+  certbot-vault sh
+```
 
 ```bash
 certbot certonly \

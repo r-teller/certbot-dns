@@ -11,29 +11,31 @@ fi
 
 # Get account path
 ACCOUNT_PARENT_PATH=/etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory
-ACCOUNT_ID=$(vault kv get --format=json secret/prd/saas/lets-encrypt | jq -r '.data.account_id')
+ACCOUNT_ID=$(vault kv get --format=json secret/prd/saas/lets-encrypt/primary | jq -r '.data.account_id')
 ACCOUNT_PATH="$ACCOUNT_PARENT_PATH/$ACCOUNT_ID"
 
 mkdir -p "$ACCOUNT_PATH"
 
 for i in meta private_key regr; do
-  vault kv get --format=json "secret/lets-encrypt/account/$i" | \
+  vault kv get --format=json "secret/prd/saas/lets-encrypt/account/$i" | \
     jq -c '.data' \
     > "$ACCOUNT_PATH/$i.json"
 done
 
-read cfUsername cfAPI < <(vault kv get --format=json secret/prd/saas/cloudflare/primary | jq -r '.data.username, .data.api')
-echo "dns_cloudflare_email = ${cfUsername}" > /etc/letsencrypt/cloudflare.ini
-echo "dns_cloudflare_api_key  = ${cfAPI}" > /etc/letsencrypt/cloudflare.ini
-# echo "dns_cloudflare_email = $(vault kv get --format=json secret/prd/saas/cloudflare/primary | jq -r '.data.username')" > /etc/letsencrypt/cloudflare.ini
+cloudflare=`vault kv get --format=json secret/prd/saas/cloudflare/primary`
+cfUsername=`echo $cloudflare | jq .data.username`
+cfAPI=`echo $cloudflare | jq .data.api`
+
+echo -e "dns_cloudflare_email = ${cfUsername}\r\ndns_cloudflare_api_key  = ${cfAPI}" > /etc/letsencrypt/cloudflare.ini
+
 chmod 600 /etc/letsencrypt/cloudflare.ini
 
-CERTIFICATES_TO_CHECK=$(vault kv list --format=json secret/prd/lets-encrypt/certificates | jq -r '.[]')
+CERTIFICATES_TO_CHECK=$(vault kv list --format=json secret/prd/certificates/lets-encrypt | jq -r '.[]')
 
 mkdir -p /etc/letsencrypt/renewal
 
 for certificate in $CERTIFICATES_TO_CHECK; do
-  CERTIFICATE_DATA=$(vault kv get --format=json "secret/prd/lets-encrypt/certificates/${certificate}")
+  CERTIFICATE_DATA=$(vault kv get --format=json "secret/prd/certificates/lets-encrypt/${certificate}")
   mkdir -p "/etc/letsencrypt/archive/${certificate}"
   mkdir -p "/etc/letsencrypt/live/${certificate}"
   for field in cert chain privkey; do

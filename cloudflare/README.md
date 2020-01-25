@@ -55,7 +55,7 @@ certbot certonly \
 ```
 
 ```bash
-VAULT_TOKEN=s.PNqyBhwl5mgmzpwg2OeJ3o7a
+VAULT_TOKEN=
 docker run --rm --name certbot-vault \
   -e "VAULT_ADDR=http://192.168.13.250:8200" \
   -e "VAULT_TOKEN=${VAULT_TOKEN}" \

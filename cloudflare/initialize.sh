@@ -9,6 +9,11 @@ if ! vault token lookup > /dev/null; then
   exit 1
 fi
 
+if [ -Z $ACCOUNT_EMAIL ]; then
+  echo '$ACCOUNT_EMAIL env must be provided.'
+  exit 1
+fi
+
 certbot register --non-interactive --agree-tos -m ${ACCOUNT_EMAIL}
 
 export ACCOUNT_PARENT_PATH=/etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory

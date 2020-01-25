@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-if [ "$1" = 'renew' ]; then
+if [ "$1" = 'initialize' ]; then
     initialize.sh
 elif [ "$1" = 'renew' ]; then
     renew.sh

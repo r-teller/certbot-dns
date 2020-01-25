@@ -9,6 +9,12 @@ if ! vault token lookup > /dev/null; then
   exit 1
 fi
 
+if [ -Z $MY_DOMAINS ]; then
+  echo 'MY_DOMAINS env must be provided, it should include one or more domains'
+  echo 'example... -e "MY_DOMAINS=example.com www.example.com"'
+  exit 1
+fi
+
 # Get account path
 ACCOUNT_PARENT_PATH=/etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory
 ACCOUNT_ID=$(vault kv get --format=json secret/prd/saas/lets-encrypt/primary | jq -r '.data.account_id')
@@ -31,8 +37,8 @@ echo -e "dns_cloudflare_email = ${cfUsername}\r\ndns_cloudflare_api_key  = ${cfA
 chmod 600 /etc/letsencrypt/cloudflare.ini
 
 certbotDomains=""
-for i in ${domains}; do
-certbotDomains=" -d ${i} ${certbotDomains}"
+for i in ${MY_DOMAINS}; do
+  certbotDomains=" -d ${i} ${certbotDomains}"
 done
 
 certbot certonly \
@@ -41,7 +47,7 @@ certbot certonly \
   ${certbotDomains}
 
 vault kv put \
-  "secret/prd/certificates/lets-encrypt/${domains%% *}" \
-  "cert=@/etc/letsencrypt/live/${domains%% *}/cert.pem" \
-  "chain=@/etc/letsencrypt/live/${domains%% *}/chain.pem" \
-  "privkey=@/etc/letsencrypt/live/${domains%% *}/privkey.pem"
+  "secret/prd/certificates/lets-encrypt/${MY_DOMAINS%% *}" \
+  "cert=@/etc/letsencrypt/live/${MY_DOMAINS%% *}/cert.pem" \
+  "chain=@/etc/letsencrypt/live/${MY_DOMAINS%% *}/chain.pem" \
+  "privkey=@/etc/letsencrypt/live/${MY_DOMAINS%% *}/privkey.pem"

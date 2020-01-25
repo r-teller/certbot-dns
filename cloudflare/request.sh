@@ -9,7 +9,7 @@ if ! vault token lookup > /dev/null; then
   exit 1
 fi
 
-if [ -Z $MY_DOMAINS ]; then
+if [ -z $MY_DOMAINS ]; then
   echo 'MY_DOMAINS env must be provided, it should include one or more domains'
   echo 'example... -e "MY_DOMAINS=example.com www.example.com"'
   exit 1

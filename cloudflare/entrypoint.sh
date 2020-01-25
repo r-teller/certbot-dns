@@ -6,10 +6,10 @@ if [ "$1" = 'initialize' ]; then
 elif [ "$1" = 'renew' ]; then
     renew.sh
     certbot renew
-elif [ "$1" = 'generate' ]; then
-    generate.sh
+elif [ "$1" = 'request' ]; then
+    request.sh
 elif [ "$1" = 'help' ]; then
-    # Do something
+    echo "Something coming soon"
 else
     exec "$@"
 fi

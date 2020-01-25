@@ -40,7 +40,7 @@ for certificate in $CERTIFICATES_TO_CHECK; do
   mkdir -p "/etc/letsencrypt/live/${certificate}"
   for field in cert chain privkey; do
     cat > "/etc/letsencrypt/archive/${certificate}/${field}1.pem" <<EOF
-$(echo "${CERTIFICATE_DATA}" | jq -r ".data.data.${field}")
+$(echo "${CERTIFICATE_DATA}" | jq -r ".data.${field}")
 EOF
     ln \
       -s "../../archive/${certificate}/${field}1.pem" \

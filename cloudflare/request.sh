@@ -24,7 +24,7 @@ mkdir -p "$ACCOUNT_PATH"
 
 for i in meta private_key regr; do
   vault kv get --format=json "secret/prd/saas/lets-encrypt/account/$i" | \
-    jq -c '..datadata' \
+    jq -c '.data.data' \
     > "$ACCOUNT_PATH/$i.json"
 done
 

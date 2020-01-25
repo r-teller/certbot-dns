@@ -11,14 +11,14 @@ fi
 
 # Get account path
 ACCOUNT_PARENT_PATH=/etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory
-ACCOUNT_ID=$(vault kv get --format=json secret/prd/saas/lets-encrypt/primary | jq -r '.data.account_id')
+ACCOUNT_ID=$(vault kv get --format=json secret/prd/saas/lets-encrypt/primary | jq -r '.data.data.account_id')
 ACCOUNT_PATH="$ACCOUNT_PARENT_PATH/$ACCOUNT_ID"
 
 mkdir -p "$ACCOUNT_PATH"
 
 for i in meta private_key regr; do
   vault kv get --format=json "secret/prd/saas/lets-encrypt/account/$i" | \
-    jq -c '.data' \
+    jq -c '.data.data' \
     > "$ACCOUNT_PATH/$i.json"
 done
 
@@ -40,7 +40,7 @@ for certificate in $CERTIFICATES_TO_CHECK; do
   mkdir -p "/etc/letsencrypt/live/${certificate}"
   for field in cert chain privkey; do
     cat > "/etc/letsencrypt/archive/${certificate}/${field}1.pem" <<EOF
-$(echo "${CERTIFICATE_DATA}" | jq -r ".data.${field}")
+$(echo "${CERTIFICATE_DATA}" | jq -r ".data.data.${field}")
 EOF
     ln \
       -s "../../archive/${certificate}/${field}1.pem" \

@@ -40,6 +40,9 @@ RUN set -eux; \
 
 COPY entrypoint.sh /usr/local/bin/
 COPY initialize.sh /usr/local/bin/
-COPY generate.sh /usr/local/bin/
+COPY request.sh /usr/local/bin/
 COPY renew.sh /usr/local/bin/
 COPY 00-update-vault.sh /etc/letsencrypt/renewal-hooks/deploy/
+
+WORKDIR /usr/local/bin/
+ENTRYPOINT [ "entrypoint.sh" ]

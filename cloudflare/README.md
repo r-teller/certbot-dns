@@ -1,67 +1,45 @@
 # certbot-dns-cloudflar
 https://developer.epages.com/blog/tech-stories/managing-lets-encrypt-certificates-in-vault/
 
-
+## Set Variables for future use
 ```bash
-docker pull rteller/certbot-dns-cloudflare
-docker run --rm -it --name certbot-vault \
-  -e "VAULT_ADDR=http://${VAULT_HOST}:8200" \
-  -e "VAULT_TOKEN=${VAULT_TOKEN}" \
-  rteller/certbot-dns-cloudflare sh
-
-certbot register --non-interactive --agree-tos -m no-reply@teller.house
-
-export ACCOUNT_PARENT_PATH=/etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory
-export ACCOUNT_ID=$(ls $ACCOUNT_PARENT_PATH)
-
-vault kv put secret/prd/saas/lets-encrypt/primary "account_id=$ACCOUNT_ID"
-
-for i in meta private_key regr; do
-  vault kv put "secret/prd/saas/lets-encrypt/account/$i" "@$ACCOUNT_PARENT_PATH/$ACCOUNT_ID/$i.json"
-done
-
-
-cloudflare=`vault kv get --format=json secret/prd/saas/cloudflare/primary`
-cfUsername=`echo $cloudflare | jq .data.username`
-cfAPI=`echo $cloudflare | jq .data.api`
-# read cfUsername cfAPI < <(vault kv get --format=json secret/prd/saas/cloudflare/primary | jq -r '.data.username, .data.api')
-echo -e "dns_cloudflare_email = ${cfUsername}\r\ndns_cloudflare_api_key  = ${cfAPI}" > /etc/letsencrypt/cloudflare.ini
-# echo "" > /etc/letsencrypt/cloudflare.ini
-# echo "dns_cloudflare_email = $(vault kv get --format=json secret/prd/saas/cloudflare/primary | jq -r '.data.username')" > /etc/letsencrypt/cloudflare.ini
-chmod 600 /etc/letsencrypt/cloudflare.ini
-
-
-domain=teller.house
-
-certbot certonly \
-  --dns-cloudflare \
-  --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
-  -d "${domain}"
-
- vault kv put \
-  "secret/prd/certificates/lets-encrypt/${domain}" \
-  "cert=@/etc/letsencrypt/live/${domain}/cert.pem" \
-  "chain=@/etc/letsencrypt/live/${domain}/chain.pem" \
-  "privkey=@/etc/letsencrypt/live/${domain}/privkey.pem"
-
-
+VAULT_ADDR='http://192.168.1.1:8200'
+VAULT_TOKEN='somethingSecure'
 ```
 
+## Initialize LetsEncrypt Account ID
+Before you can request a certificate from LetsEncrypt you must generate an account and initialize a shared secret.
 ```bash
-certbot certonly \
-  --dns-cloudflare \
-  --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
-  -d "example.com"
+docker run -it --rm --name certbot-vault \
+  -e "VAULT_ADDR=${VAULT_ADDR}" \
+  -e "VAULT_TOKEN=${VAULT_TOKEN}" \
+  -e "ACCOUNT_EMAIL=no-reply@example.com" \
+  rteller/certbot-dns:cloudflare initialize
 ```
 
+## Request Certificate from LetsEncrypt
+Request a certificate for one or more domains, domains should be seperated with a space.
 ```bash
-VAULT_TOKEN=
-docker run --rm --name certbot-vault \
-  -e "VAULT_ADDR=http://192.168.13.250:8200" \
+### Single Domain Request
+docker run -it --rm --name certbot-vault \
+  -e "VAULT_ADDR=${VAULT_ADDR}" \
   -e "VAULT_TOKEN=${VAULT_TOKEN}" \
-  -e "domains=hal.teller.house" \
-  --entrypoint sh \
-  -v /home/ubuntu/generate.sh:/usr/local/bin/generate.sh \
-  -v /home/ubuntu/entrypoint.sh:/usr/local/bin/entrypoint.sh \
-  rteller/certbot-dns-cloudflare /usr/local/bin/generate.sh
-  ```
+  -e "MY_DOMAINS=example.com" \
+  rteller/certbot-dns:cloudflare request
+
+### Multiple Domain Request
+docker run -it --rm --name certbot-vault \
+  -e "VAULT_ADDR=${VAULT_ADDR}" \
+  -e "VAULT_TOKEN=${VAULT_TOKEN}" \
+  -e "MY_DOMAINS=example.com www.example.com" \
+  rteller/certbot-dns:cloudflare request
+```
+
+## Renew Certificate from LetsEncrypt that will expire soon
+Request a certificate for one or more domains, domains should be seperated with a space.
+```bash
+docker run -it --rm --name certbot-vault \
+  -e "VAULT_ADDR=${VAULT_ADDR}" \
+  -e "VAULT_TOKEN=${VAULT_TOKEN}" \
+  rteller/certbot-dns:cloudflare renew
+```

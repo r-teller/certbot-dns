@@ -10,7 +10,8 @@ if ! vault token lookup > /dev/null; then
 fi
 
 if [ -Z $ACCOUNT_EMAIL ]; then
-  echo '$ACCOUNT_EMAIL env must be provided.'
+  echo 'ACCOUNT_EMAIL env must be provided.'
+  echo 'example.. -e "ACCOUNT_EMAIL=no-reply@example.com"'
   exit 1
 fi
 

@@ -8,6 +8,8 @@ elif [ "$1" = 'renew' ]; then
     certbot renew
 elif [ "$1" = 'generate' ]; then
     generate.sh
+elif [ "$1" = 'help' ]; then
+    # Do something
 else
     exec "$@"
 fi

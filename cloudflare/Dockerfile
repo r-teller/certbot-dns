@@ -38,11 +38,11 @@ RUN set -eux; \
     apk del gnupg && \
     rm -rf /root/.gnupg
 
-COPY entrypoint.sh /usr/local/bin/
-COPY initialize.sh /usr/local/bin/
-COPY request.sh /usr/local/bin/
-COPY renew.sh /usr/local/bin/
-COPY 00-update-vault.sh /etc/letsencrypt/renewal-hooks/deploy/
+COPY ./entrypoint.sh /usr/local/bin/
+COPY ./initialize.sh /usr/local/bin/
+COPY ./request.sh /usr/local/bin/
+COPY ./renew.sh /usr/local/bin/
+COPY ./00-update-vault.sh /etc/letsencrypt/renewal-hooks/deploy/
 
 WORKDIR /usr/local/bin/
 ENTRYPOINT [ "entrypoint.sh" ]

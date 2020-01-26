@@ -2,10 +2,17 @@
 ARG TARGET_ARCH=amd64
 FROM ${TARGET_ARCH}/python:3.8-alpine3.11
  
+# Qemu Arch (x86_64, arm, ...)
+# ARG QEMU_ARCH
+# ENV QEMU_ARCH=${QEMU_ARCH}
+# COPY qemu-${QEMU_ARCH}-static /usr/bin/
+
+
 ARG CERTBOT_VERSION=1.1.0
 ENV CERTBOT_VERSION=${CERTBOT_VERSION}
 
 RUN mkdir -p /etc/letsencrypt /var/lib/letsencrypt
+
 
 # Retrieve certbot code
 RUN mkdir -p src \
@@ -43,10 +50,8 @@ RUN apk add --no-cache --virtual .build-deps \
         --editable src/certbot \
 && apk del .build-deps
 
-
 ARG VAULT_VERSION=1.1.3
 
-# Retrieve and Install Vault
 RUN set -eux; \
     apk add --no-cache curl gnupg jq tzdata && \
     apkArch="$(apk --print-arch)"; \
@@ -83,7 +88,6 @@ RUN set -eux; \
     apk del gnupg && \
     rm -rf /root/.gnupg
 
-# Install cloudflare plugin
 RUN  pip install certbot-dns-cloudflare
 
 COPY ./entrypoint.sh /usr/local/bin/
